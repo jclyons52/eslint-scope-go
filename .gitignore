@@ -1,0 +1,4 @@
+node_modules/
+oracle/node_modules/
+*.test
+.DS_Store
