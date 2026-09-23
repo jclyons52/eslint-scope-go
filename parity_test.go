@@ -110,6 +110,12 @@ func TestParity(t *testing.T) {
 	if _, err := os.Stat(driver); err != nil {
 		t.Skip("oracle driver not installed; skipping")
 	}
+	// The driver requires the real espree/eslint-scope/estraverse. They are not
+	// committed (test-time dependencies), so a checkout without `npm ci` in
+	// oracle/ skips — a skip is never a pass. CI installs them from the lockfile.
+	if _, err := os.Stat(filepath.Join(wd, "oracle", "node_modules", "eslint-scope")); err != nil {
+		t.Skip("oracle/node_modules missing: run `npm ci` in oracle/ to verify against the npm original")
+	}
 
 	cases := corpus()
 	// Build the corpus JSON for the JS side.
