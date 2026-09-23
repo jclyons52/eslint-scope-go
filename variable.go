@@ -14,6 +14,14 @@ type Variable struct {
 	// declared "writable"). eslint-scope does not maintain it; ESLint sets it
 	// after analysis when applying the config's globals.
 	Writeable bool
+	// ESLintImplicitGlobalSetting mirrors ESLint's
+	// variable.eslintImplicitGlobalSetting: "readonly" or "writable" for every
+	// global the linter defined from configuration (the ecmaVersion builtins,
+	// `env` entries and the config's `globals`) — including readonly ones, which
+	// Writeable alone cannot distinguish from an undeclared name. Rules read it
+	// (no-redeclare's builtinGlobals counts such a global as a declaration);
+	// eslint-scope itself does not set it.
+	ESLintImplicitGlobalSetting string
 	// ESLintUsed records that ESLint's context.markVariableAsUsed() (or a
 	// rule such as no-unused-vars marking an exported binding) has counted
 	// this variable as used. eslint-scope itself does not set it — ESLint

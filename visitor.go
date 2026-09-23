@@ -31,12 +31,28 @@ func newVisitorBase(options *Options) visitorBase {
 	return vb
 }
 
-// iterateKeys reproduces Object.keys for the "iteration" fallback. A Go map
-// loses JS insertion order, so keys are emitted in sorted order for
-// determinism. (Only reached for node types absent from VisitorKeys.)
+// iterateKeys reproduces eslint-visitor-keys' getKeys() for the "iteration"
+// fallback:
+//
+//	Object.keys(node).filter(key => !KEY_BLACKLIST.has(key) && key[0] !== "_")
+//
+// The blacklist matters for more than tidiness: the core attaches a `parent`
+// link to every node, so returning it would walk node → parent → child → …
+// until the stack blows up. That is exactly what happened for node types the
+// key table does not know (e.g. a StaticBlock before it was added), which
+// crashed every scope-using rule on `class C { static { … } }`.
+//
+// A Go map loses JS insertion order, so keys are emitted sorted for determinism.
+// (Only reached for node types absent from VisitorKeys.)
 func iterateKeys(n Node) []string {
 	keys := make([]string, 0, len(n))
 	for k := range n {
+		if k == "parent" || k == "leadingComments" || k == "trailingComments" {
+			continue
+		}
+		if len(k) > 0 && k[0] == '_' {
+			continue
+		}
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
